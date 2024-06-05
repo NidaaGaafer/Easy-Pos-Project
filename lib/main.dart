@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
             backgroundColor: Color.fromARGB(255, 236, 232, 234)),
         useMaterial3: true,
       ),
+      debugShowCheckedModeBanner: false,
       home: const MyHomePage(),
     );
   }

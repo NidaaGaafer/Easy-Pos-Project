@@ -1,4 +1,4 @@
-import 'dart:ffi';
+//import 'dart:ffi';
 
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
@@ -46,7 +46,7 @@ class SqlHelpert {
            )
            """);
       batch.execute("""
-           Create table if not exists categories(
+           Create table if not exists clients(
             id integer primary key,
             name text not null,
             email text,
