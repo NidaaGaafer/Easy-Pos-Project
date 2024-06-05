@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:my_easy_pos/helpers/sql_helpert.dart';
 import 'package:my_easy_pos/models/clients_data.dart';
 import 'package:my_easy_pos/pages/clientops.dart';
+import 'package:my_easy_pos/widgets/search.dart';
 
 class ClientsPage extends StatefulWidget {
   const ClientsPage({super.key});
@@ -59,20 +61,36 @@ class _ClientsPageState extends State<ClientsPage> {
                 icon: Icon(Icons.add))
           ],
         ),
-        body: PaginatedDataTable2(
-          columns: [
-            DataColumn(label: Text('id')),
-            DataColumn(label: Text('name')),
-            DataColumn(label: Text('email')),
-            DataColumn(label: Text('phone')),
-            DataColumn(label: Text('actions')),
-          ],
-          border: TableBorder.all(),
-          renderEmptyRowsInTheEnd: false,
-          isHorizontalScrollBarVisible: true,
-          columnSpacing: 10,
-          minWidth: 600,
-          source: MyDataTableSource(clients, getClientData),
+        body: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              SearchTextField(tableName: 'clients'),
+              SizedBox(height: 10),
+              Expanded(
+                child: PaginatedDataTable2(
+                  columns: [
+                    DataColumn(label: Text('id')),
+                    DataColumn(label: Text('name')),
+                    DataColumn(label: Text('email')),
+                    DataColumn(label: Text('phone')),
+                    DataColumn(label: Text('actions')),
+                  ],
+                  headingRowColor:
+                      MaterialStatePropertyAll(Theme.of(context).primaryColor),
+                  headingTextStyle:
+                      TextStyle(color: Colors.white, fontSize: 16),
+                  border: TableBorder.all(),
+                  renderEmptyRowsInTheEnd: false,
+                  isHorizontalScrollBarVisible: true,
+                  columnSpacing: 10,
+                  minWidth: 600,
+                  source: MyDataTableSource(clients, getClientData),
+                ),
+              ),
+            ],
+          ),
         ));
   }
 }

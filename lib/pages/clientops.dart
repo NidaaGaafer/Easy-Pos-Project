@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:my_easy_pos/helpers/sql_helpert.dart';
 import 'package:my_easy_pos/models/clients_data.dart';
 import 'package:my_easy_pos/widgets/button.dart';
+import 'package:my_easy_pos/widgets/search.dart';
 import 'package:my_easy_pos/widgets/textfiled.dart';
 
 class ClientOpsPage extends StatefulWidget {
