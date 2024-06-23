@@ -22,8 +22,15 @@ class SqlHelpert {
     }
   }
 
+  Future<void> rgisterForeignKeys() async {
+    await db!.rawQuery("PRAGMA foreign_keys = ON");
+    var result = await db!.rawQuery("PRAGMA foreign_keys");
+    print("foreign keys result : $result");
+  }
+
   Future<bool> createTables() async {
     try {
+      await rgisterForeignKeys();
       var batch = db!.batch();
       batch.execute("""
            Create table if not exists categories(
@@ -40,9 +47,11 @@ class SqlHelpert {
             description text not null,
             price double not null,
             stock integer not null,
-            isAvaliable boolean not null,
-            image blob,
-            categortId integer not null
+            isAvaliable boolean not null, 
+            image text,
+            categoryId integer not null,
+            foreign key(categoryId) references categories(id)
+            on delete restrict
            )
            """);
       batch.execute("""

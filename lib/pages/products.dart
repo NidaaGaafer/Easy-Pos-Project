@@ -1,45 +1,49 @@
-import 'dart:async';
-
 import 'package:data_table_2/data_table_2.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:my_easy_pos/helpers/sql_helpert.dart';
-import 'package:my_easy_pos/models/clients_data.dart';
-import 'package:my_easy_pos/pages/clientops.dart';
+import 'package:my_easy_pos/models/products_data.dart';
+//import 'package:my_easy_pos/pages/productOps.dart';
+import 'package:my_easy_pos/pages/productsops.dart';
 import 'package:my_easy_pos/widgets/app_taple.dart';
 import 'package:my_easy_pos/widgets/search.dart';
 
-class ClientsPage extends StatefulWidget {
-  const ClientsPage({super.key});
+class ProductsPage extends StatefulWidget {
+  const ProductsPage({super.key});
 
   @override
-  State<ClientsPage> createState() => _ClientsPageState();
+  State<ProductsPage> createState() => _ProductsPageState();
 }
 
-class _ClientsPageState extends State<ClientsPage> {
-  List<ClientData>? clients;
+class _ProductsPageState extends State<ProductsPage> {
+  List<ProductData>? products;
   @override
   void initState() {
-    getClientData();
+    getProductData();
     super.initState();
   }
 
-  void getClientData() async {
+  void getProductData() async {
     try {
       var sqlHelpert = GetIt.I.get<SqlHelpert>();
-      var data = await sqlHelpert.db!.query('clients');
+      var data = await sqlHelpert.db!.rawQuery("""
+                   select P.*, C.name as categoryName, C.description as categoryDesc from products P
+                   inner join categories C
+                   where P.categoryId = C.id
+                   """);
 
       if (data.isNotEmpty) {
-        clients = [];
+        products = [];
         for (var item in data) {
-          clients!.add(ClientData.fromJson(item));
+          products!.add(ProductData.fromJson(item));
         }
       } else {
-        clients = [];
+        products = [];
       }
     } catch (e) {
-      clients = [];
+      products = [];
       print('error when get data $e');
     }
     setState(() {});
@@ -49,14 +53,14 @@ class _ClientsPageState extends State<ClientsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Client Page"),
+          title: Text("Products Page"),
           actions: [
             IconButton(
                 onPressed: () async {
                   var result = await Navigator.push(context,
-                      MaterialPageRoute(builder: (ctx) => ClientOpsPage()));
+                      MaterialPageRoute(builder: (ctx) => ProductsOpsPage()));
                   if (result ?? false) {
-                    getClientData();
+                    getProductData();
                   }
                 },
                 icon: Icon(Icons.add))
@@ -71,29 +75,36 @@ class _ClientsPageState extends State<ClientsPage> {
               SizedBox(height: 10),
               Expanded(
                   child: AppTable(
+                minWidth: 1500,
                 columns: [
                   DataColumn(label: Text('id')),
                   DataColumn(label: Text('name')),
-                  DataColumn(label: Text('email')),
-                  DataColumn(label: Text('phone')),
+                  DataColumn(label: Text('description')),
+                  DataColumn(label: Text('price')),
+                  DataColumn(label: Text('stock')),
+                  DataColumn(label: Text('isAvaliable')),
+                  DataColumn(label: Text('image')),
+                  DataColumn(label: Text('categoryId')),
+                  DataColumn(label: Text('categoryName')),
+                  DataColumn(label: Text('categoryDesc')),
                   DataColumn(label: Text('actions')),
                 ],
-                source: DataClientSource(
-                  addclients: clients,
-                  onDelete: (ClientData) {
-                    deletRow(ClientData.id!);
+                source: DataProductSource(
+                  addProduct: products,
+                  onDelete: (ProductData) {
+                    deletRow(ProductData.id!);
                   },
-                  onUpdate: (ClientData) async {
+                  onUpdate: (ProductData) async {
                     var result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (ctx) => ClientOpsPage(
-                          clientData: ClientData,
+                        builder: (ctx) => ProductsOpsPage(
+                          productData: ProductData,
                         ),
                       ),
                     );
                     if (result ?? false) {
-                      getClientData();
+                      getProductData();
                     }
                   },
                   //getClientData
@@ -110,9 +121,9 @@ class _ClientsPageState extends State<ClientsPage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('Delet client'),
+              title: const Text('Delet products'),
               content:
-                  const Text('Are you sure you want to delete this client ?'),
+                  const Text('Are you sure you want to delete this products ?'),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -131,9 +142,9 @@ class _ClientsPageState extends State<ClientsPage> {
       if (dialogResult ?? false) {
         var sqlHelpert = GetIt.I.get<SqlHelpert>();
         var result = await sqlHelpert.db!
-            .delete('clients', where: 'id =?', whereArgs: [id]);
+            .delete('products', where: 'id =?', whereArgs: [id]);
         if (result >= 0) {
-          getClientData();
+          getProductData();
         }
       }
     } catch (e) {
@@ -142,28 +153,34 @@ class _ClientsPageState extends State<ClientsPage> {
   }
 }
 
-class DataClientSource extends DataTableSource {
-  List<ClientData>? addclients;
+class DataProductSource extends DataTableSource {
+  List<ProductData>? addProduct;
   //void Function() getClientData;
-  void Function(ClientData) onDelete;
-  void Function(ClientData) onUpdate;
-  DataClientSource(
-      {required this.addclients,
+  void Function(ProductData) onDelete;
+  void Function(ProductData) onUpdate;
+  DataProductSource(
+      {required this.addProduct,
       //required this.getClientData,
       required this.onDelete,
       required this.onUpdate});
   @override
   DataRow? getRow(int index) {
     return DataRow2(cells: [
-      DataCell(Text('${addclients?[index].id}')),
-      DataCell(Text('${addclients?[index].name}')),
-      DataCell(Text('${addclients?[index].email}')),
-      DataCell(Text('${addclients?[index].phone}')),
+      DataCell(Text('${addProduct?[index].id}')),
+      DataCell(Text('${addProduct?[index].name}')),
+      DataCell(Text('${addProduct?[index].description}')),
+      DataCell(Text('${addProduct?[index].price}')),
+      DataCell(Text('${addProduct?[index].stock}')),
+      DataCell(Text('${addProduct?[index].isAvaliable}')),
+      DataCell(Text('${addProduct?[index].image}')),
+      DataCell(Text('${addProduct?[index].categoryId}')),
+      DataCell(Text('${addProduct?[index].categoryName}')),
+      DataCell(Text('${addProduct?[index].categoryDesc}')),
       DataCell(Row(
         children: [
           IconButton(
             onPressed: () {
-              onDelete(addclients![index]);
+              onDelete(addProduct![index]);
               //deletRow(addclients?[index].id ?? 0);
             },
             icon: Icon(Icons.delete),
@@ -171,7 +188,7 @@ class DataClientSource extends DataTableSource {
           ),
           IconButton(
             onPressed: () {
-              onUpdate(addclients![index]);
+              onUpdate(addProduct![index]);
             },
             icon: Icon(Icons.edit),
           )
@@ -188,7 +205,7 @@ class DataClientSource extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => addclients?.length ?? 0;
+  int get rowCount => addProduct?.length ?? 0;
 
   @override
   // TODO: implement selectedRowCount

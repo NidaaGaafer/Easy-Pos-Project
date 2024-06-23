@@ -1,45 +1,42 @@
-import 'dart:async';
-
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:my_easy_pos/helpers/sql_helpert.dart';
-import 'package:my_easy_pos/models/clients_data.dart';
-import 'package:my_easy_pos/pages/clientops.dart';
+import 'package:my_easy_pos/models/categories_data.dart';
+import 'package:my_easy_pos/pages/categoriesops.dart';
 import 'package:my_easy_pos/widgets/app_taple.dart';
 import 'package:my_easy_pos/widgets/search.dart';
 
-class ClientsPage extends StatefulWidget {
-  const ClientsPage({super.key});
+class CategoriesPage extends StatefulWidget {
+  const CategoriesPage({super.key});
 
   @override
-  State<ClientsPage> createState() => _ClientsPageState();
+  State<CategoriesPage> createState() => _CategoriesPageState();
 }
 
-class _ClientsPageState extends State<ClientsPage> {
-  List<ClientData>? clients;
+class _CategoriesPageState extends State<CategoriesPage> {
+  List<CategoryData>? categories;
   @override
   void initState() {
-    getClientData();
+    getCategoryData();
     super.initState();
   }
 
-  void getClientData() async {
+  void getCategoryData() async {
     try {
       var sqlHelpert = GetIt.I.get<SqlHelpert>();
-      var data = await sqlHelpert.db!.query('clients');
+      var data = await sqlHelpert.db!.query('categories');
 
       if (data.isNotEmpty) {
-        clients = [];
+        categories = [];
         for (var item in data) {
-          clients!.add(ClientData.fromJson(item));
+          categories!.add(CategoryData.fromJson(item));
         }
       } else {
-        clients = [];
+        categories = [];
       }
     } catch (e) {
-      clients = [];
+      categories = [];
       print('error when get data $e');
     }
     setState(() {});
@@ -49,14 +46,14 @@ class _ClientsPageState extends State<ClientsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Client Page"),
+          title: Text("Categoris Page"),
           actions: [
             IconButton(
                 onPressed: () async {
                   var result = await Navigator.push(context,
-                      MaterialPageRoute(builder: (ctx) => ClientOpsPage()));
+                      MaterialPageRoute(builder: (ctx) => CategoriesOpsPage()));
                   if (result ?? false) {
-                    getClientData();
+                    getCategoryData();
                   }
                 },
                 icon: Icon(Icons.add))
@@ -67,33 +64,32 @@ class _ClientsPageState extends State<ClientsPage> {
           child: Column(
             children: [
               SizedBox(height: 20),
-              SearchTextField(tableName: 'clients'),
+              SearchTextField(tableName: 'categories'),
               SizedBox(height: 10),
               Expanded(
                   child: AppTable(
                 columns: [
                   DataColumn(label: Text('id')),
                   DataColumn(label: Text('name')),
-                  DataColumn(label: Text('email')),
-                  DataColumn(label: Text('phone')),
+                  DataColumn(label: Text('description')),
                   DataColumn(label: Text('actions')),
                 ],
-                source: DataClientSource(
-                  addclients: clients,
-                  onDelete: (ClientData) {
-                    deletRow(ClientData.id!);
+                source: DataCategorySource(
+                  addCategory: categories,
+                  onDelete: (CategoryData) {
+                    deletRow(CategoryData.id!);
                   },
-                  onUpdate: (ClientData) async {
+                  onUpdate: (CategoryData) async {
                     var result = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (ctx) => ClientOpsPage(
-                          clientData: ClientData,
+                        builder: (ctx) => CategoriesOpsPage(
+                          categoryData: CategoryData,
                         ),
                       ),
                     );
                     if (result ?? false) {
-                      getClientData();
+                      getCategoryData();
                     }
                   },
                   //getClientData
@@ -131,9 +127,9 @@ class _ClientsPageState extends State<ClientsPage> {
       if (dialogResult ?? false) {
         var sqlHelpert = GetIt.I.get<SqlHelpert>();
         var result = await sqlHelpert.db!
-            .delete('clients', where: 'id =?', whereArgs: [id]);
+            .delete('categories', where: 'id =?', whereArgs: [id]);
         if (result >= 0) {
-          getClientData();
+          getCategoryData();
         }
       }
     } catch (e) {
@@ -142,28 +138,27 @@ class _ClientsPageState extends State<ClientsPage> {
   }
 }
 
-class DataClientSource extends DataTableSource {
-  List<ClientData>? addclients;
+class DataCategorySource extends DataTableSource {
+  List<CategoryData>? addCategory;
   //void Function() getClientData;
-  void Function(ClientData) onDelete;
-  void Function(ClientData) onUpdate;
-  DataClientSource(
-      {required this.addclients,
+  void Function(CategoryData) onDelete;
+  void Function(CategoryData) onUpdate;
+  DataCategorySource(
+      {required this.addCategory,
       //required this.getClientData,
       required this.onDelete,
       required this.onUpdate});
   @override
   DataRow? getRow(int index) {
     return DataRow2(cells: [
-      DataCell(Text('${addclients?[index].id}')),
-      DataCell(Text('${addclients?[index].name}')),
-      DataCell(Text('${addclients?[index].email}')),
-      DataCell(Text('${addclients?[index].phone}')),
+      DataCell(Text('${addCategory?[index].id}')),
+      DataCell(Text('${addCategory?[index].name}')),
+      DataCell(Text('${addCategory?[index].description}')),
       DataCell(Row(
         children: [
           IconButton(
             onPressed: () {
-              onDelete(addclients![index]);
+              onDelete(addCategory![index]);
               //deletRow(addclients?[index].id ?? 0);
             },
             icon: Icon(Icons.delete),
@@ -171,7 +166,7 @@ class DataClientSource extends DataTableSource {
           ),
           IconButton(
             onPressed: () {
-              onUpdate(addclients![index]);
+              onUpdate(addCategory![index]);
             },
             icon: Icon(Icons.edit),
           )
@@ -188,7 +183,7 @@ class DataClientSource extends DataTableSource {
 
   @override
   // TODO: implement rowCount
-  int get rowCount => addclients?.length ?? 0;
+  int get rowCount => addCategory?.length ?? 0;
 
   @override
   // TODO: implement selectedRowCount

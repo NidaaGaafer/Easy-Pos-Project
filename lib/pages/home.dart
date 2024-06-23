@@ -3,7 +3,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:my_easy_pos/helpers/sql_helpert.dart';
+import 'package:my_easy_pos/pages/categories.dart';
+import 'package:my_easy_pos/pages/categories.dart';
 import 'package:my_easy_pos/pages/clients.dart';
+import 'package:my_easy_pos/pages/products.dart';
 import 'package:my_easy_pos/widgets/iconspage.dart';
 import 'package:my_easy_pos/widgets/widget_1.dart';
 
@@ -89,14 +92,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   HomeIcons(
                     icon: Icons.newspaper,
-                    label: 'All sales',
+                    label: 'Categories',
                     color: Color.fromARGB(255, 214, 158, 2),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (ctx) => CategoriesPage()));
+                    },
                   ),
                   HomeIcons(
                     icon: Icons.inventory_2,
                     label: 'Products',
                     color: Colors.pink,
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (ctx) => ProductsPage()));
+                      //
+                    },
+                  ),
+                  HomeIcons(
+                    icon: Icons.newspaper,
+                    label: 'All sales',
+                    color: Color.fromARGB(255, 214, 158, 2),
                     onPressed: () {},
                   ),
                   HomeIcons(

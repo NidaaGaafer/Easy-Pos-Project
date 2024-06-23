@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:my_easy_pos/helpers/sql_helpert.dart';
-import 'package:my_easy_pos/models/clients_data.dart';
+import 'package:my_easy_pos/models/categories_data.dart';
 import 'package:my_easy_pos/widgets/button.dart';
-import 'package:my_easy_pos/widgets/search.dart';
 import 'package:my_easy_pos/widgets/textfiled.dart';
 
-class ClientOpsPage extends StatefulWidget {
-  final ClientData? clientData;
-  const ClientOpsPage({super.key, this.clientData});
+class CategoriesOpsPage extends StatefulWidget {
+  final CategoryData? categoryData;
+  const CategoriesOpsPage({super.key, this.categoryData});
 
   @override
-  State<ClientOpsPage> createState() => _ClientOpsPageState();
+  State<CategoriesOpsPage> createState() => _CategoriesOpsPageState();
 }
 
-class _ClientOpsPageState extends State<ClientOpsPage> {
-  TextEditingController? nameController;
-  TextEditingController? emailController;
-  TextEditingController? phoneController;
+class _CategoriesOpsPageState extends State<CategoriesOpsPage> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  TextEditingController? nameController;
+  TextEditingController? descriptionController;
 
   @override
   void initState() {
-    nameController = TextEditingController(text: widget.clientData?.name);
-    emailController = TextEditingController(text: widget.clientData?.email);
-    phoneController = TextEditingController(text: widget.clientData?.phone);
+    nameController = TextEditingController(text: widget.categoryData?.name);
+    descriptionController =
+        TextEditingController(text: widget.categoryData?.description);
     super.initState();
   }
 
@@ -32,9 +30,9 @@ class _ClientOpsPageState extends State<ClientOpsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.clientData != null
+        title: Text(widget.categoryData != null
             ? 'Update Information'
-            : ' Add New Clint'),
+            : ' Add New Categoriey'),
       ),
       body: Form(
           key: formKey,
@@ -46,7 +44,7 @@ class _ClientOpsPageState extends State<ClientOpsPage> {
                 controller: nameController!,
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return "Please Enter Your Name";
+                    return "Please Enter Name of Category";
                   } else {
                     return null;
                   }
@@ -54,23 +52,11 @@ class _ClientOpsPageState extends State<ClientOpsPage> {
               ),
               SizedBox(height: 10),
               AppTextField(
-                label: 'Email',
-                controller: emailController!,
+                label: 'Description',
+                controller: descriptionController!,
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return "Please Enter Your Email";
-                  } else {
-                    return null;
-                  }
-                },
-              ),
-              SizedBox(height: 10),
-              AppTextField(
-                label: 'Phone',
-                controller: phoneController!,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "Please Enter Your Phone";
+                    return "The Description is Required";
                   } else {
                     return null;
                   }
@@ -80,7 +66,7 @@ class _ClientOpsPageState extends State<ClientOpsPage> {
               MyButton(
                 description: 'Add Client',
                 onPressed: () async {
-                  await addClient();
+                  await addCategory();
                 },
               )
             ],
@@ -88,26 +74,24 @@ class _ClientOpsPageState extends State<ClientOpsPage> {
     );
   }
 
-  Future<void> addClient() async {
+  Future<void> addCategory() async {
     try {
       if (formKey.currentState!.validate()) {
         var sqlHelper = GetIt.I.get<SqlHelpert>();
-        if (widget.clientData != null) {
+        if (widget.categoryData != null) {
           // Update client information
           await sqlHelper.db!.update(
-              'clients',
+              'categories',
               {
                 'name': nameController?.text,
-                'hhh': emailController?.text,
-                'phone': phoneController?.text
+                'description': descriptionController?.text,
               },
               where: 'id =?',
-              whereArgs: [widget.clientData?.id]);
+              whereArgs: [widget.categoryData?.id]);
         } else {
-          await sqlHelper.db!.insert('clients', {
+          await sqlHelper.db!.insert('categories', {
             'name': nameController?.text,
-            'hhhh': emailController?.text,
-            'phone': phoneController?.text
+            'description': descriptionController?.text,
           });
         }
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
